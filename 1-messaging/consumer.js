@@ -7,13 +7,13 @@ const openConnection = amq.connect(URL);
 let consumerId;
 let channel;
 
-export const createConsumer = async (id, queue_name = 'default_tasks') => {
+export const createConsumer = async (id, queueToListenName = 'default_tasks') => {
   consumerId = id;
 
   return openConnection
     .then(async (conn) => {
       channel = await conn.createChannel();
-      const queueInfo = await channel.assertQueue(queue_name);
+      const queueInfo = await channel.assertQueue(queueToListenName);
       return channel.consume(queueInfo.queue, handleMessage);
     })
     .catch((err) => false);

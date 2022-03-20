@@ -4,14 +4,14 @@ const URL = 'amqp://localhost';
 const openConnection = amq.connect(URL);
 
 let channel;
-let queue;
+let queueName;
 
-export const createProducer = async (queue_name = 'default_tasks') => {
-  queue = queue_name;
+export const createProducer = async (queueToSendName = 'default_tasks') => {
+  queueName = queueToSendName;
   return openConnection
     .then(async (conn) => {
       channel = await conn.createChannel();
-      await channel.assertQueue(queue);
+      await channel.assertQueue(queueName);
       return true;
     })
     .catch((err) => false);
@@ -20,5 +20,5 @@ export const createProducer = async (queue_name = 'default_tasks') => {
 export const sendMessage = (msg) => {
   if (!channel) return false;
   console.log('Sending', { msg });
-  return channel.sendToQueue(queue, Buffer.from(msg));
+  return channel.sendToQueue(queueName, Buffer.from(msg));
 };

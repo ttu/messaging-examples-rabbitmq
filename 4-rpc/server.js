@@ -5,33 +5,33 @@ const URL = "amqp://localhost";
 const openConnection = amq.connect(URL);
 
 let consumerId;
-let consumer_channel;
-let producer_channel;
-let queue_replies;
+let consumerChannel;
+let producerChannel;
+let replyQueueName;
 
 export const start = async () => {
   await createConsumer("important_tasks_receiver");
   await createProducer();
 };
 
-const createConsumer = async (id, queue_name = "default_requests") => {
+const createConsumer = async (id, queueToListenName = "default_requests") => {
   consumerId = id;
 
   return openConnection
     .then(async (conn) => {
-      consumer_channel = await conn.createChannel();
-      const queueInfo = await consumer_channel.assertQueue(queue_name);
-      return consumer_channel.consume(queueInfo.queue, handleMessage);
+      consumerChannel = await conn.createChannel();
+      const queueInfo = await consumerChannel.assertQueue(queueToListenName);
+      return consumerChannel.consume(queueInfo.queue, handleMessage);
     })
     .catch((err) => false);
 };
 
-const createProducer = async (queue_name = "default_replies") => {
-  queue_replies = queue_name;
+const createProducer = async (queueToSendName = "default_replies") => {
+  replyQueueName = queueToSendName;
   return openConnection
     .then(async (conn) => {
-      producer_channel = await conn.createChannel();
-      await producer_channel.assertQueue(queue_replies);
+      producerChannel = await conn.createChannel();
+      await producerChannel.assertQueue(replyQueueName);
       return true;
     })
     .catch((err) => false);
@@ -40,12 +40,12 @@ const createProducer = async (queue_name = "default_replies") => {
 const handleMessage = (msg) => {
   if (msg === null) return;
   console.log(`${consumerId} received`, { msg: msg.content.toString() });
-  consumer_channel.ack(msg);
+  consumerChannel.ack(msg);
   sendMessage(msg.content.toString() + '_ok');
 };
 
 const sendMessage = (msg) => {
-  if (!producer_channel) return false;
+  if (!producerChannel) return false;
   console.log("Sending", { msg });
-  return producer_channel.sendToQueue(queue_replies, Buffer.from(msg));
+  return producerChannel.sendToQueue(replyQueueName, Buffer.from(msg));
 };

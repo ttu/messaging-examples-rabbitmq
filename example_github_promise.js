@@ -18,7 +18,7 @@ open
   .then(([ch, ok]) =>
     ch.consume(QUEUE_NAME, (msg) => {
       if (msg !== null) {
-        console.log(msg.content.toString());
+        console.log('Received:', msg.content.toString());
         ch.ack(msg);
       }
     }),

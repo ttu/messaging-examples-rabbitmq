@@ -4,14 +4,14 @@ const URL = 'amqp://localhost';
 const openConnection = amq.connect(URL);
 
 let channel;
-let exchange;
+let exchangeName;
 
-export const createProducer = async (exchange_name = 'default_tasks') => {
-  exchange = exchange_name;
+export const createProducer = async (exchangeToSendName = 'default_tasks') => {
+  exchangeName = exchangeToSendName;
   return openConnection
     .then(async (conn) => {
       channel = await conn.createChannel();
-      await channel.assertExchange(exchange_name, 'fanout', { durable: false });
+      await channel.assertExchange(exchangeName, 'fanout', { durable: false });
       return true;
     })
     .catch((err) => false);
@@ -20,5 +20,5 @@ export const createProducer = async (exchange_name = 'default_tasks') => {
 export const sendMessage = (msg) => {
   if (!channel) return false;
   console.log('Sending', { msg });
-  return channel.publish(exchange, '', Buffer.from(msg));
+  return channel.publish(exchangeName, '', Buffer.from(msg));
 };

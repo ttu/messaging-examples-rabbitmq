@@ -4,17 +4,17 @@ import { createConsumer } from './consumer.js';
 const myArgs = process.argv.slice(2);
 const type = myArgs[0] ?? 'p';
 const id = myArgs[1] ?? 'A';
-const exchange_name = myArgs[2] ?? 'default_topic';
-const routing_key = myArgs[3] ?? '';
+const exchangeName = myArgs[2] ?? 'default_topic';
+const routingKey = myArgs[3] ?? '';
 
 // node index.js type queue_name
 const main = async () => {
   if (type === 'c') {
-    await createConsumer(id, exchange_name, routing_key);
+    await createConsumer(id, exchangeName, routingKey);
     return;
   }
 
-  await createProducer(exchange_name);
+  await createProducer(exchangeName);
   sendMessage('US', 'US event 1');
   sendMessage('DE', 'DE event 1');
   sendMessage('DE', 'DE event 2');
